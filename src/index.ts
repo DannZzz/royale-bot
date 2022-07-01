@@ -25,7 +25,7 @@ handler(client).then(async () => {
     })
     .start();
 
-    if (!main.shopItems) ev.doNow()
+    if (!main.shopItems || main.shopItems.length == 0) await ev.doNow()
 
     EverydayChest.set('shopRefresh', ev);
     
