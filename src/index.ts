@@ -25,6 +25,8 @@ handler(client).then(async () => {
     })
     .start();
 
+    if (!main.shopItems) ev.doNow()
+
     EverydayChest.set('shopRefresh', ev);
     
     registerSlashCommands()
