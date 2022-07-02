@@ -34,7 +34,7 @@ export default new SlashCommand({
                 if (pack.reward.itemList) {
                     const item = randomItem(Ages.getItems(pack.reward.itemList));
 
-                    const hasItem = Ages.hasItem(thisUser.ages[pack.reward.itemList], item.uniqueString);
+                    const hasItem = Ages.hasItem(thisUser.ages[pack.reward.itemList] || [], item.uniqueString);
 
                     if (hasItem) {
                         primAdd += 15;
