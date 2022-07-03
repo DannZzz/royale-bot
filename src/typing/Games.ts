@@ -22,6 +22,7 @@ interface Player {
     items: AgeItem[];
     pickedItems: AgeItem[];
     kills: number;
+    isBot: boolean;
 }
 
 interface GameOptions {
@@ -32,6 +33,7 @@ interface GameOptions {
     host: string;
     isStarted: boolean;
     message: Message;
+    bots: number;
 }
 
 export class Games {
@@ -73,15 +75,37 @@ export class Games {
                     nickname: doc.nickname || x.username,
                     kills: 0,
                     isDied: false,
+                    isBot: false,
                     pickedItems: items.filter(x => x.isPicked).map(x => Ages.getItems(age, 'force').find(it => it.uniqueString === x.item)),
                     items: items.map(x => Ages.getItems(age, 'force').find(it => it.uniqueString === x.item)),
                     bonus: bonus * 20 + 100
                 }
             }));
+            if (game.bots) for (let i = 0; i < game.bots; i++) {
+                players.push({
+                    id: `bot-${i+1}`,
+                    nickname: `Бот-${i+1}`,
+                    kills: 0,
+                    isDied: false,
+                    isBot: true,
+                    pickedItems: [],
+                    items: [],
+                    bonus: 80
+                })
+            }
             game.message.reactions.removeAll();
             game.players = players;
             game.isStarted = true;
-        } 
+        }
+        const ageData = Ages.getAge(game.age)
+        new EmbedConstructor(colors)
+            .setTitle(`__Игра началась__!`)
+            .setText(stripIndents`
+            **__Эпоха__**: ${ageData}
+            **__Приз__**: ${Currency.types[ageData.moneyType].emoji} ${Currency.formatNumber(~~(ageData.moneyFromUser * game.players.length))}
+            **__Игроки__**: ${~~game.players.length}
+            `)
+            .send(game.channel);
         
         const gameTimer = setInterval(async () => {
             const randomPlayers = game.randomPlayers(6);
@@ -175,9 +199,9 @@ export class Games {
                     `).send(game.channel);
 
                 await Promise.all([
-                    users.updateOne({_id: winner.id}, {$inc: {[age.moneyType]: reward, wins: 1}}),
-                    users.updateMany({_id: {$in: game.players.map(p => p.id)}}, {$inc: {gamesPlayed: 1}}),
-                    ...(game.players.filter(p => p.kills > 0).map(async p => users.updateOne({_id: p.id}, {$inc: {kills: p.kills}}))),
+                    !winner.isBot && users.updateOne({_id: winner.id}, {$inc: {[age.moneyType]: reward, wins: 1}}),
+                    users.updateMany({_id: {$in: game.players.filter(p => !p.isBot).map(p => p.id)}}, {$inc: {gamesPlayed: 1}}),
+                    ...(game.players.filter(p => p.kills > 0 && !p.isBot).map(async p => users.updateOne({_id: p.id}, {$inc: {kills: p.kills}}))),
                     users.updateOne({_id: game.host}, {$inc: {gamesHosted: 1}})
                 ])
                 Games.remove(game.channel.id);
@@ -199,6 +223,7 @@ class Game implements GameOptions {
     isStarted: boolean;
     gameType: "normal" | "custom";
     message: Message<boolean>;
+    bots: number;
     constructor (options: GameOptions) {
         Object.assign(this, options);
     }

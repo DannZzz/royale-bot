@@ -14,7 +14,6 @@ export default new SlashCommand ({
 .setDMPermission(false)
         .setName("создать-игру")
         .setDescription("Создать новую игру")
-        
         .addStringOption(o => o
             .setName("эпоха")
             .setDescription("Выбрать эпоху игры")
@@ -24,10 +23,14 @@ export default new SlashCommand ({
             .setName("тип-игры")
             .setDescription("Выбрать тип игры")
             .setRequired(true)
-            .addChoices({name: "Нормальная игра: начнётся автоматически через минуту", value: "normal"}, {name: "Пользовательская игра: создатель игры решает, когда начнётся", value: "custom"})),
+            .addChoices({name: "Нормальная игра: начнётся автоматически через минуту", value: "normal"}, {name: "Пользовательская игра: создатель игры решает, когда начнётся", value: "custom"}))
+        .addIntegerOption(o => o
+            .setName("боты")
+            .setDescription("Количество ботов")),
     async execute ({interaction, thisGuild, options, Embed, thisUser}) {
         const ageName = options.getString('эпоха');
         const gameType = options.getString('тип-игры') as ("normal" | "custom");
+        const bots = interaction.memberPermissions.has('ADMINISTRATOR') ? (options.getInteger('боты') || 0) : 0;
         
         const age = Ages.getAge(ageName as any);
 
@@ -53,13 +56,13 @@ export default new SlashCommand ({
             isStarted: false,
             host: interaction.user.id,
             gameType,
-            message: msg
+            message: msg,
+            bots
         });
 
         msg.react(GAME_JOIN_EMOJI);
 
         if (gameType === "normal") setTimeout(() => {
-            Embed.clear().setText("Игра началась!").send(interaction.channel);
             Games.start(interaction.channelId, age.name)
         }, 60 * 1 * 1000)
         
