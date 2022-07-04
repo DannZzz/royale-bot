@@ -1,8 +1,8 @@
-import { EmojiResolvable, Interaction, Message, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed } from "discord.js";
+import { ButtonInteraction, CommandInteraction, EmojiResolvable, Interaction, Message, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed, ModalSubmitInteraction, SelectMenuInteraction } from "discord.js";
 import { PAGINATION_EMOJIS } from "../config";
 
 export interface PaginationOptions {
-    readonly interaction: Interaction;
+    readonly interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction;
     readonly embeds: MessageEmbed[]
     readonly attachments?: MessageAttachment[];
     readonly timeout?: number
@@ -11,7 +11,7 @@ export interface PaginationOptions {
 }
 
 export class Pagination implements PaginationOptions {
-    readonly interaction: Interaction;
+    readonly interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction;
     readonly attachments?: MessageAttachment[] = [];
     readonly embeds: MessageEmbed[];
     readonly timeout?: number = 100000;
@@ -24,7 +24,7 @@ export class Pagination implements PaginationOptions {
     public async createSimplePagination(): Promise<Message> {
         if (this.embeds.length === 0) throw new Error('Pagination: Embeds length must be 1 or more');
         if (this.embeds.length === 1) {
-            return this.interaction.channel.send({ embeds: [this.embeds[0].setFooter({ text: "1 / 1" })], files: this?.attachments?.length > 0 ? [this.attachments[0]] : [] });
+            return this.interaction.reply({ fetchReply: true, embeds: [this.embeds[0].setFooter({ text: "1 / 1" })], files: this?.attachments?.length > 0 ? [this.attachments[0]] : [] }) as any;
         }
         var page = 0;
 
@@ -41,7 +41,7 @@ export class Pagination implements PaginationOptions {
 
         const row = new MessageActionRow().addComponents(buttons);
         
-        const curPage = await this.interaction.channel.send({ embeds: [this.embeds[page].setFooter({ text: `${page + 1} / ${this.embeds.length}` })], files: this?.attachments?.length > 0 ? [this.attachments[page]] : [], components: [row] });
+        const curPage = await this.interaction.reply({ fetchReply: true, embeds: [this.embeds[page].setFooter({ text: `${page + 1} / ${this.embeds.length}` })], files: this?.attachments?.length > 0 ? [this.attachments[page]] : [], components: [row] }) as Message;
 
         const collector = curPage.createMessageComponentCollector({
             filter: i => {
@@ -82,7 +82,7 @@ export class Pagination implements PaginationOptions {
     public async createAdvancedPagination(): Promise<Message> {
         if (this.embeds.length === 0) throw new Error('Pagination: Embeds length must be 1 or more');
         if (this.embeds.length === 1) {
-            return this.interaction.channel.send({ embeds: [this.embeds[0].setFooter({ text: "1 / 1" })], files: this?.attachments?.length > 0 ? [this.attachments[0]] : [] });
+            return this.interaction.reply({ fetchReply: true, embeds: [this.embeds[0].setFooter({ text: "1 / 1" })], files: this?.attachments?.length > 0 ? [this.attachments[0]] : [] }) as any;
         }
         var page = 0;
 
@@ -107,7 +107,7 @@ export class Pagination implements PaginationOptions {
         ]
 
         const row = new MessageActionRow().addComponents(buttons);
-        const curPage = await this.interaction.channel.send({ embeds: [this.embeds[page].setFooter({ text: `${page + 1} / ${this.embeds.length}` })], files: this?.attachments?.length > 0 ? [this.attachments[page]] : [] , components: [row] });
+        const curPage = await this.interaction.reply({ fetchReply: true, embeds: [this.embeds[page].setFooter({ text: `${page + 1} / ${this.embeds.length}` })], files: this?.attachments?.length > 0 ? [this.attachments[page]] : [] , components: [row] }) as Message;
 
         const collector = curPage.createMessageComponentCollector({
             filter: i => {
