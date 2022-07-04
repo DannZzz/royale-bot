@@ -30,9 +30,9 @@ export default new SlashCommand ({
 
         const isPicked = (uniqueName: string) => ((thisUser?.ages?.[ageName] || [])?.find(i => i.item === uniqueName) as {isPicked: boolean, item: string})?.isPicked || '';
 
-        const ageItems = items.map(item => `${isPicked(item.uniqueString) && "▸"}${item.emoji} \`${item.name}\` - ${hasItem(item.uniqueString) ? `\`${Currency.formatNumber(item.bonus)}\` | ${EMOJIS.success}` : "`??`"}`);
+        const ageItems = items.map(item => `${isPicked(item.uniqueString) && "▸"}${item.emoji} \`${item.name}\` - ${hasItem(item.uniqueString) ? `\`${Currency.formatNumber(item.bonus)}\` | ✔` : "`??`"}`);
 
-        const shopItems = Shop.items.filter(it => it.age === ageName).map(it => `${isPicked(it.uniqueString) && "▸"}${it.emoji} \`${it.name}\` - ${hasItem(it.uniqueString) ? `\`${Currency.formatNumber(it.bonus)}\` | ${EMOJIS.success}` : '`??`'}`);
+        const shopItems = Shop.items.filter(it => it.age === ageName).map(it => `${isPicked(it.uniqueString) && "▸"}${it.emoji} \`${it.name}\` - ${hasItem(it.uniqueString) ? `\`${Currency.formatNumber(it.bonus)}\` | ✔` : '`??`'}`);
         const toVisualate = [...ageItems, ...shopItems]
         const ageItemsEmbed = Embed
             .setText(stripIndents`
