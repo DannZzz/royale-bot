@@ -7,6 +7,7 @@ import Ages from "../../docs/ages/Ages";
 import Shop from "../../docs/ages/Shop";
 import Currency from "../../docs/currency/Currency";
 import SlashCommand from "../../typing/SlashCommand";
+import { Pagination } from "../../typing/Pagination";
 
 const data = new SlashCommandBuilder()
     .setName("предметы")
@@ -33,17 +34,26 @@ export default new SlashCommand ({
 
         const shopItems = Shop.items.filter(it => it.age === ageName).map(it => `${isPicked(it.uniqueString) && "▸"}${it.emoji} \`${it.name}\` - ${hasItem(it.uniqueString) ? `\`${Currency.formatNumber(it.bonus)}\` | ${EMOJIS.success}` : '`??`'}`);
         const toVisualate = [...ageItems, ...shopItems]
-        Embed
+        const ageItemsEmbed = Embed
             .setText(stripIndents`
             **Эпоха**: ${age}
             
             **— Доступны в паках**
             ${ageItems.join("\n")}
+            `)
+            .setThumbnail(age.iconLink)
+            .toEmbed();
+
+        const shopItemsEmbed = Embed
+            .setText(stripIndents`
+            **Эпоха**: ${age}
 
             **— Доступны в магазине**
             ${shopItems.join("\n")}
             `)
             .setThumbnail(age.iconLink)
-            .interactionReply(interaction)
+            .toEmbed();
+
+        new Pagination({interaction, embeds: [ageItemsEmbed, shopItemsEmbed], validIds: [interaction.user.id]}).createSimplePagination();
     }
 })
