@@ -100,10 +100,11 @@ export class Games {
         const ageData = Ages.getAge(game.age)
         new EmbedConstructor(colors)
             .setTitle(`__Игра началась__!`)
+            .setThumbnail(ageData.iconLink)
             .setText(stripIndents`
             **__Эпоха__**: ${ageData}
             **__Приз__**: ${Currency.types[ageData.moneyType].emoji} ${Currency.formatNumber(~~(ageData.moneyFromUser * game.players.length))}
-            **__Игроки__**: ${~~game.players.length}
+            **__Игроки__**: ${Currency.formatNumber(~~game.players.length)}
             `)
             .send(game.channel);
         
